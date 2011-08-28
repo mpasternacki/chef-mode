@@ -1,0 +1,58 @@
+
+* About
+
+  Emacs Kitchen is an Emacs minor mode to make editing [[http://www.opscode.com/chef/][Opscode Chef]]
+  [[http://wiki.opscode.com/display/chef/Chef+Repository][repositories]] easier.
+
+  It defines a minor mode, chef-mode, and a corresponding
+  global-chef-mode, with two keybindings:
+
+  - C-c C-c (M-x chef-knife-dwim) - when editing part of chef
+    repository (cookbook, data bag item, node/role/environment
+    definition), uploads that part to the Chef Server by calling
+    appropriate knife command
+  - C-c C-k (M-x knife) - runs a user-specified knife command
+
+  The library detects bundler and, if Gemfile is present on top-level
+  of the Chef repository, runs 'bundle exec knife' instead of plain
+  'knife'.
+
+  If =chef-use-rvm= is non-nil, it talks with [[https://github.com/senny/rvm.el][rvm.el]] to use proper
+  Ruby and gemset.
+
+* Road map
+
+** DONE Detect Chef repository root
+   CLOSED: [2011-08-29 Mon 00:14]
+*** DONE Detect Bundler Gemfile in Chef repository root
+    CLOSED: [2011-08-29 Mon 00:14]
+
+** DONE C-c C-c -- knife-dwim -- DWIM send-to-server
+   CLOSED: [2011-08-29 Mon 00:15]
+   - [X] inside a cookbook - knife cookbook upload
+   - [X] inside a role - knife role from file
+   - [X] inside a data bag file - data bag from file
+   - [X] flexible enough to allow data bag from yaml
+
+** TODO Make C-c C-c not conflict with other modes when not in chef-repo
+** TODO C-c C-f -- find files inside project
+   
+*** C-c C-f c -- ask for cookbook, then:
+**** r - recipe
+**** f - file
+**** t - template
+**** m - metadata
+**** d - definition file
+**** a - attributes file
+**** l - library file
+**** s - resource
+**** p - provider
+**** e - readme
+*** C-c C-f r -- role
+*** C-c C-f d -- data bag item
+*** C-c C-f f - config file
+*** C-c C-f e - environment
+
+** DONE M-x knife (C-c C-k) to run arbitrary knife command
+   CLOSED: [2011-08-29 Mon 00:15]
+** TODO ? M-x rake (C-c C-r)
