@@ -55,14 +55,13 @@
 (define-globalized-minor-mode global-chef-mode
   chef-mode turn-on-chef-mode)
 
-(defun chef-root (&optional path)
+(defun find-chef-root (&optional path)
   (when (null path)
     (setq path (or buffer-file-name
-                   default-directory)))
-  
+                   default-directory)))  
   (cond
    ((not (file-directory-p path))
-    (chef-root (concat (file-name-as-directory path) "..")))
+    (find-chef-root (concat (file-name-as-directory path) "..")))
    ((equal (expand-file-name path) (expand-file-name "~")) nil)
    ((equal (expand-file-name path) "/") nil)
    ((let ((ff (directory-files path)))
@@ -71,12 +70,22 @@
                (member "roles" ff)
                (member "config" ff))))
     (file-name-as-directory (expand-file-name path)))
-   (t (chef-root (concat (file-name-as-directory path) "..")))))
+   (t (find-chef-root (concat (file-name-as-directory path) "..")))))
+
+(defun chef/fallback (trigger)
+  (let* ((chef-mode nil)
+         (command (key-binding trigger)))
+    (when (commandp command)
+      (call-interactively command))))
+
+(defmacro chef/with-root-or-fallback (trigger &rest body)
+  `(let ((chef-root (find-chef-root)))
+     (if (null chef-root)
+         (chef/fallback ,trigger)
+       ,@body)))
 
 (defun chef-run-knife (command &rest args)
-  (let ((default-directory (or (chef-root)
-                               (error "Not in chef repo!"))))
-    (when chef-use-rvm
+  (when chef-use-rvm
       (rvm-activate-corresponding-ruby))
     (with-current-buffer "*knife*"
       (toggle-read-only nil)
@@ -91,36 +100,39 @@
         (apply 'call-process
                chef-knife-command nil t
                chef-knife-command (cons command args)))
-      (toggle-read-only t)))
+      (toggle-read-only t))
   (switch-to-buffer-other-window "*knife*" t)
   (fit-window-to-buffer))
 
 (defun knife (command)
   "Run knife"
   (interactive "Command: knife ")
-  (apply 'chef-run-knife (split-string-and-unquote command)))
+  (chef/with-root-or-fallback
+   (kbd "\C-c \C-k")
+   (apply 'chef-run-knife (split-string-and-unquote command))))
 
 (defun chef-knife-dwim ()
   "Upload currently edited thing to the Chef server.
 
 Guesses whether you have "
   (interactive)
-  (let ((b (current-buffer)))
-    (save-some-buffers nil (lambda ()
-                             (eq b (current-buffer)))))
-  (let* ((default-directory (or (chef-root)
-                                (error "Not in chef repo!")))
-         (rpath (file-relative-name buffer-file-name default-directory)))
-    (cond
-     ((string-match "^\\(?:site-\\)?cookbooks/\\([^/]+\\)/" rpath)
-      (print (match-string 1 rpath))
-      (chef-run-knife "cookbook" "upload" (match-string 1 rpath)))
-     ((string-match "^\\(role\\|node\\|environment\\)s/\\(.*\\)" rpath)
-      (chef-run-knife (match-string 1 rpath) "from" "file" (match-string 2 rpath)))
-     ((string-match "^data.bags/\\([^/]+\\)/\\(.*\\.yaml\\)" rpath)
-      (chef-run-knife "data" "bag" "from" "yaml" (match-string 1 rpath) (match-string 2 rpath)))
-     ((string-match "^data.bags/\\([^/]+\\)/\\(.*\\)" rpath)
-      (chef-run-knife "data" "bag" "from" "file" (match-string 1 rpath) (match-string 2 rpath)))
-     (t (error "Don't know how to upload %s to the Chef server" rpath)))))
+  (chef/with-root-or-fallback
+   (kbd "\C-c \C-c")
+   (let ((b (current-buffer)))
+     (save-some-buffers nil (lambda ()
+                              (eq b (current-buffer)))))
+   (let* ((default-directory chef-root)
+          (rpath (file-relative-name buffer-file-name default-directory)))
+     (cond
+      ((string-match "^\\(?:site-\\)?cookbooks/\\([^/]+\\)/" rpath)
+       (print (match-string 1 rpath))
+       (chef-run-knife "cookbook" "upload" (match-string 1 rpath)))
+      ((string-match "^\\(role\\|node\\|environment\\)s/\\(.*\\)" rpath)
+       (chef-run-knife (match-string 1 rpath) "from" "file" (match-string 2 rpath)))
+      ((string-match "^data.bags/\\([^/]+\\)/\\(.*\\.yaml\\)" rpath)
+       (chef-run-knife "data" "bag" "from" "yaml" (match-string 1 rpath) (match-string 2 rpath)))
+      ((string-match "^data.bags/\\([^/]+\\)/\\(.*\\)" rpath)
+       (chef-run-knife "data" "bag" "from" "file" (match-string 1 rpath) (match-string 2 rpath)))
+      (t (chef/fallback (kbd "\C-c \C-c")))))))
 
 ;;; chef-mode.el ends here

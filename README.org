@@ -34,7 +34,8 @@
    - [X] inside a data bag file - data bag from file
    - [X] flexible enough to allow data bag from yaml
 
-** TODO Make C-c C-c not conflict with other modes when not in chef-repo
+** DONE Make C-c C-c not conflict with other modes when not in chef-repo
+   CLOSED: [2011-08-29 Mon 00:38]
 ** TODO C-c C-f -- find files inside project
    
 *** C-c C-f c -- ask for cookbook, then:
