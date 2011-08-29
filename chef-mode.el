@@ -116,22 +116,26 @@
 (defun chef-run-knife (command &rest args)
   (when chef-use-rvm
       (rvm-activate-corresponding-ruby))
-    (with-current-buffer "*knife*"
-      (toggle-read-only nil)
-      (erase-buffer)
-      (insert-string (concat "+ knife " command " "
-                             (mapconcat 'identity args " ")
-                             "\n"))
-      (if (and chef-use-bundler (file-exists-p "Gemfile"))
-          (apply 'call-process
-                 "bundle" nil t
-                 "bundle" "exec" chef-knife-command (cons command args))
+
+(let ((knife-buffer (get-buffer-create "*knife*")))
+  (with-current-buffer knife-buffer 
+    (setq list-buffers-directory default-directory)
+    (toggle-read-only 0)
+    (erase-buffer)
+    (insert-string (concat "+ knife " command " "
+                           (mapconcat 'identity args " ")
+                           "\n")))
+  (if (and chef-use-bundler (file-exists-p "Gemfile"))
         (apply 'call-process
-               chef-knife-command nil t
-               chef-knife-command (cons command args)))
-      (toggle-read-only t))
-  (switch-to-buffer-other-window "*knife*" t)
-  (fit-window-to-buffer))
+               "bundle" nil knife-buffer
+               "bundle" "exec" chef-knife-command (cons command args))
+      (apply 'call-process
+             chef-knife-command nil knife-buffer
+             chef-knife-command (cons command args)))
+  (with-current-buffer knife-buffer
+    (toggle-read-only 1))
+  (switch-to-buffer-other-window knife-buffer t)
+  (fit-window-to-buffer)))
 
 (defun knife (command)
   "Run knife"
