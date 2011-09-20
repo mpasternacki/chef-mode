@@ -155,8 +155,8 @@ Guesses whether you have "
      (save-some-buffers nil (lambda ()
                               (eq b (current-buffer)))))
    (if buffer-file-name
-       (let* ((default-directory chef-root)
-              (rpath (file-relative-name buffer-file-name default-directory)))
+       (let ((default-directory chef-root)
+             (rpath (file-relative-name buffer-file-name chef-root)))
          (cond
           ((string-match "^\\(?:site-\\)?cookbooks/\\([^/]+\\)/" rpath)
            (print (match-string 1 rpath))
