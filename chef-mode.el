@@ -132,10 +132,10 @@
       (apply 'call-process
              chef-knife-command nil knife-buffer
              chef-knife-command (cons command args)))
-  (with-current-buffer knife-buffer
-    (toggle-read-only 1))
-  (switch-to-buffer-other-window knife-buffer t)
-  (fit-window-to-buffer)))
+    (with-current-buffer knife-buffer
+      (toggle-read-only 1))
+    (switch-to-buffer-other-window knife-buffer t)
+    (fit-window-to-buffer)))
 
 (defun knife (command)
   "Run knife"
