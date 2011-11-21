@@ -117,16 +117,20 @@
   (when chef-use-rvm
     (rvm-activate-corresponding-ruby))
 
-  (let ((knife-buffer (get-buffer-create "*knife*")))
+  (let ((knife-buffer (get-buffer-create "*knife*"))
+        (use-bundler (and chef-use-bundler (file-exists-p "Gemfile"))))
     (with-current-buffer knife-buffer
       (setq default-directory chef-root)
       (setq list-buffers-directory default-directory)
       (toggle-read-only 0)
       (erase-buffer)
-      (insert-string (concat "[" default-directory "] knife " command " "
+      (insert-string (concat "# " default-directory "\n"
+                             (when use-bundler
+                               "bundle exec ")
+                             chef-knife-command " " command " "
                              (mapconcat 'identity args " ")
-                             "\n")))
-    (if (and chef-use-bundler (file-exists-p "Gemfile"))
+                             "\n\n")))
+    (if use-bundler
         (apply 'call-process
                "bundle" nil knife-buffer
                "bundle" "exec" chef-knife-command (cons command args))
