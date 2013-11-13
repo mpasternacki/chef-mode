@@ -75,7 +75,7 @@
 
 (define-minor-mode chef-mode
   "Mode for interacting with Opscode Chef"
-  nil chef-mode-map)
+  nil " Chef" chef-mode-map)
 
 (defun turn-on-chef-mode ()
   "Enable chef-mode."
@@ -122,9 +122,9 @@
     (with-current-buffer knife-buffer
       (setq default-directory chef-root)
       (setq list-buffers-directory default-directory)
-      (toggle-read-only 0)
+      (read-only-mode 0)
       (erase-buffer)
-      (insert-string (concat "# " default-directory "\n"
+      (insert (concat "# " default-directory "\n"
                              (when use-bundler
                                "bundle exec ")
                              chef-knife-command " " command " "
@@ -138,7 +138,7 @@
              chef-knife-command nil knife-buffer
              chef-knife-command (cons command args)))
     (with-current-buffer knife-buffer
-      (toggle-read-only 1))
+      (read-only-mode 1))
     (switch-to-buffer-other-window knife-buffer t)
     (fit-window-to-buffer)))
 
@@ -233,7 +233,6 @@ Guesses whether you have "
   (if target
       (browse-url (concat base anchor (cdr target)))
     (browse-url base))))
-
 
 (provide 'chef-mode)
 ;;; chef-mode.el ends here
