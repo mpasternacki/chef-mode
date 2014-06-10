@@ -57,6 +57,8 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'rvm nil t))
+
 
 (defvar chef-knife-command "knife"
   "Knife command to run")
