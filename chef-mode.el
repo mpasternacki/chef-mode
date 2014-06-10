@@ -73,14 +73,17 @@
 (define-key chef-mode-map (kbd "\C-c \C-k") 'knife)
 (define-key chef-mode-map (kbd "\C-c \C-c") 'chef-knife-dwim)
 
+;;;###autoload
 (define-minor-mode chef-mode
   "Mode for interacting with Opscode Chef"
   nil chef-mode-map)
 
+;;;###autoload
 (defun turn-on-chef-mode ()
   "Enable chef-mode."
   (chef-mode 1))
 
+;;;###autoload
 (define-globalized-minor-mode global-chef-mode
   chef-mode turn-on-chef-mode)
 
