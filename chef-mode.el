@@ -122,14 +122,15 @@
     (with-current-buffer knife-buffer
       (setq default-directory chef-root)
       (setq list-buffers-directory default-directory)
+      (special-mode)
       (toggle-read-only 0)
       (erase-buffer)
-      (insert-string (concat "# " default-directory "\n"
-                             (when use-bundler
-                               "bundle exec ")
-                             chef-knife-command " " command " "
-                             (mapconcat 'identity args " ")
-                             "\n\n")))
+      (insert (concat "# " default-directory "\n"
+                      (when use-bundler
+                        "bundle exec ")
+                      chef-knife-command " " command " "
+                      (mapconcat 'identity args " ")
+                      "\n\n")))
     (if use-bundler
         (apply 'call-process
                "bundle" nil knife-buffer
