@@ -57,15 +57,24 @@
 
 ;;; Code:
 
+(defgroup chef-mode nil
+  "Chef minor mode."
+  :group 'languages)
 
-(defvar chef-knife-command "knife"
-  "Knife command to run")
+(defcustom chef-knife-command "knife"
+  "Knife command to run"
+  :type 'string
+  :group 'chef-mode)
 
-(defvar chef-use-bundler t
-  "Use `bundle exec knife' if Gemfile exists")
+(defcustom chef-use-bundler t
+  "Use `bundle exec knife' if Gemfile exists"
+  :type 'boolean
+  :group 'chef-mode)
 
-(defvar chef-use-rvm t
-  "If non-nil, require rvm.el and call rvm-activate-corresponding-ruby on chef repo root before calling knife")
+(defcustom chef-use-rvm t
+  "If non-nil, require rvm.el and call rvm-activate-corresponding-ruby on chef repo root before calling knife"
+  :type 'boolean
+  :group 'chef-mode)
 
 (defvar chef-mode-map (make-sparse-keymap)
   "Key map for chef-mode")
